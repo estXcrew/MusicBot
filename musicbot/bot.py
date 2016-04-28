@@ -1766,6 +1766,27 @@ class MusicBot(discord.Client):
             usr = user_mentions[0]
             return Response("%s have %s to eat from %s" % (usr.mention, choice(emoji), author.name))
 
+    async def cmd_hype(self, author, player):
+        """
+        Usage:
+            {command_prefix}woot
+
+        Indicates positive response to the current song played.
+        Scores for each song will be displayed after the song has finished playing
+        """
+        hypes = []
+        hypeCheck = hypes.count(author)
+        if hypeCheck == 0:
+            hypes.append(author)
+        else if hypeCheck == 1:
+            return Response("%s you have already hyped for this song")
+        else:
+            return Response("Someone has been added to hypes list multiple times. Something went horribly wrong")
+            
+        song_progress = timedelta(seconds=player.progress)
+        if song_progress <= 0:
+            return Response("There were %s hypes for **%s**") % (hypes.count(), player.current_entry.title)
+        
     async def cmd_next(self, channel, player):
         """
         Usage:
