@@ -1779,7 +1779,7 @@ class MusicBot(discord.Client):
         if hypeCheck == 0:
             hypes.append(author)
             return Response("Your hype has been added. There are now %s hypes for this song.", reply=True, delete_after=25) % (hypes.count())
-        else if hypeCheck == 1:
+        else: if hypeCheck == 1:
             return Response("You have already hyped for this song", reply=True, delete_after=25)
         else:
             return Response("Someone has been added to hypes list multiple times. Something went horribly wrong")
