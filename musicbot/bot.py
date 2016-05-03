@@ -368,12 +368,12 @@ class MusicBot(discord.Client):
     async def on_play(self, player, entry):
         await self.update_now_playing(entry)
         player.skip_state.reset()
-        await self.safe_send_message(channel, "The Previous song got %s Hypes" % player.hype_state.hype_count())
-        player.hype_state.reset()
-
+        
         channel = entry.meta.get('channel', None)
         author = entry.meta.get('author', None)
-
+        totalhypes = player.hype_state.hype_count
+        
+        player.hype_state.reset()
         if channel and author:
             last_np_msg = self.server_specific_data[channel.server]['last_np_msg']
             if last_np_msg and last_np_msg.channel == channel:
