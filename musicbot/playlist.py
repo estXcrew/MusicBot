@@ -62,7 +62,7 @@ class Playlist(EventEmitter):
                 # unfortunately this is literally broken
                 # https://github.com/KeepSafe/aiohttp/issues/758
                 # https://github.com/KeepSafe/aiohttp/issues/852
-                content_type = await get_header(self.bot.session, info['url'], 'CONTENT-TYPE')
+                content_type = await get_header(self.bot.aiosession, info['url'], 'CONTENT-TYPE')
                 print("Got content type", content_type)
 
             except Exception as e:
@@ -380,7 +380,7 @@ class PlaylistEntry:
 
                 if expected_fname_noex in flistdir:
                     try:
-                        rsize = int(await get_header(self.playlist.bot.session, self.url, 'CONTENT-LENGTH'))
+                        rsize = int(await get_header(self.playlist.bot.aiosession, self.url, 'CONTENT-LENGTH'))
                     except:
                         rsize = 0
 
@@ -406,18 +406,23 @@ class PlaylistEntry:
             else:
                 ldir = os.listdir(self.download_folder)
                 flistdir = [f.rsplit('.', 1)[0] for f in ldir]
-                expected_fname_noex = os.path.basename(self.expected_filename.rsplit('.', 1)[0])
+                expected_fname_base = os.path.basename(self.expected_filename)
+                expected_fname_noex = expected_fname_base.rsplit('.', 1)[0]
 
                 # idk wtf this is but its probably legacy code
                 # or i have youtube to blame for changing shit again
 
-                if self.expected_filename in ldir:
-                    self.filename = ldir.index(self.expected_filename)
+                if expected_fname_base in ldir:
+                    self.filename = os.path.join(self.download_folder, expected_fname_base)
                     print("[Download] Cached:", self.url)
 
                 elif expected_fname_noex in flistdir:
-                    self.filename = self.expected_filename
                     print("[Download] Cached (different extension):", self.url)
+                    self.filename = os.path.join(self.download_folder, ldir[flistdir.index(expected_fname_noex)])
+                    print("Expected %s, got %s" % (
+                        self.expected_filename.rsplit('.', 1)[-1],
+                        self.filename.rsplit('.', 1)[-1]
+                    ))
 
                 else:
                     await self._really_download()
