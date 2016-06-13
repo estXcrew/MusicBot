@@ -94,6 +94,7 @@ class MusicPlayer(EventEmitter):
         self.voice_client = voice_client
         self.playlist = playlist
         self.playlist.on('entry-added', self.on_entry_added)
+        self.recent_songs = playlist.recent_songs
         self._volume = bot.config.default_volume
 
         self._play_lock = asyncio.Lock()
@@ -277,16 +278,16 @@ class MusicPlayer(EventEmitter):
             self._current_player._connected.set()
 
     async def websocket_check(self):
-        if self.bot.config.debug_mode:
-            print("[Debug] Creating websocket check loop")
+        if self.bot.config.log_debug:
+            await self.bot.log(":electric_plug: Creating websocket check loop")
 
         while not self.is_dead:
             try:
                 self.voice_client.ws.ensure_open()
                 assert self.voice_client.ws.open
             except:
-                if self.bot.config.debug_mode:
-                    print("[Debug] Voice websocket is %s, reconnecting" % self.voice_client.ws.state_name)
+                if self.bot.config.log_debug:
+                    await self.bot.log(":electric_plug: Voice websocket is %s, reconnecting" % self.voice_client.ws.state_name)
                 await self.bot.reconnect_voice_client(self.voice_client.channel.server)
                 await asyncio.sleep(4)
             finally:
